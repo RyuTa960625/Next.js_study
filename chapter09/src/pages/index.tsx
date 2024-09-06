@@ -5,39 +5,43 @@ import { ReactNode, useEffect } from "react";
 import books from "@/mock/books.json";
 import BookItem from "@/components/book-item";
 import { InferGetServerSidePropsType } from "next";
+import fetchBooks from "@/lib/fetch-books";
+import fetchRandomBooks from "@/lib/fetch-random-books";
 
-export const getServerSideProps = () => {
-  // 컴포넌트보다 먼저 실행되어서, 컴포넌트에 필요한 데이터를 불러오는 함수
+export const getServerSideProps = async() => {
 
-  console.log("서버사이드 프롭스");
-  const data = "Hello";
+  // const allBooks = await fetchBooks()
+  // const recoBooks = await fetchRandomBooks()
+
+  const [allBooks, recoBooks] = await Promise.all([
+    fetchBooks(),
+    fetchRandomBooks(),
+  ])
 
   return {
     props: {
-      data,
+      allBooks,
+      recoBooks,
     },
   };
 }
 
-export default function Home({ data } : InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Home({ allBooks, recoBooks } : InferGetServerSidePropsType<typeof getServerSideProps>) {
 
-  console.log(data);
-
-  useEffect(() => {
-    console.log(window);
-  }, []);
+  console.log(allBooks);
+  console.log(recoBooks);
 
   return (
     <div className={style.container}>
       <section>
         <h3>지금 추천하는 도서</h3>
-        {books.map((book) => (
+        {recoBooks.map((book) => (
           <BookItem key={book.id} {...book} />
         ))}
       </section>
       <section>
         <h3>등록된 모든 도서</h3>
-        {books.map((book) => (
+        {allBooks.map((book) => (
           <BookItem key={book.id} {...book} />
         ))}
       </section>

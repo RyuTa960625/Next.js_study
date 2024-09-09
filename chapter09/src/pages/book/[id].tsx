@@ -1,7 +1,8 @@
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import { GetServerSidePropsContext, GetStaticPropsContext, InferGetServerSidePropsType, InferGetStaticPropsType } from "next";
 import style from "./[id].module.css";
 import books from "@/mock/books.json";
 import fetchOneBook from "@/lib/fetch-one-book";
+import { useRouter } from "next/router";
 
 // const mockData = {
 //   id: 1,
@@ -17,10 +18,27 @@ import fetchOneBook from "@/lib/fetch-one-book";
 
 const mockData = books[0];
 
-export const getServerSideProps = async (context : GetServerSidePropsContext) => {
+export const getStaticPaths =  () => {
+  return {
+    paths: [
+      { params: { id: "1" } },
+      { params: { id: "2" } },
+      { params: { id: "3" } },
+    ],
+    fallback: true,
+  }
+}
+
+export const getStaticProps = async (context : GetStaticPropsContext) => {
 
   const id = context.params!.id;
-  const book = await fetchOneBook(Number(id));
+  const book = await fetchOneBook(Number(id)); 
+
+  if (!book) {
+    return {
+      notFound: true,
+    };
+  } 
 
   return {
     props: {
@@ -29,10 +47,16 @@ export const getServerSideProps = async (context : GetServerSidePropsContext) =>
   };
 }
 
-export default function Page({ book } : InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Page({ book } : InferGetStaticPropsType<typeof getStaticProps>) {
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return "로딩중...";
+  }
   if (!book) {
     return "문제 발생 다시 시도해주세요";
   }
+
   const {
     id,
     title,

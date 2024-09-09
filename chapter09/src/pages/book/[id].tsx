@@ -52,7 +52,16 @@ export default function Page({ book } : InferGetStaticPropsType<typeof getStatic
   const router = useRouter();
 
   if (router.isFallback) {
-    return "로딩중...";
+    return
+    <>
+      <Head>
+        <title>한입 북스</title>
+        <meta property="og:Image" content="/thumbnail.png" />
+        <meta property="og:title" content="한입북스" />
+        <meta property="og:description" content="한입 북스에 등록된 도서들을 만나보세요" />
+      </Head>
+      <div>로딩중...</div>
+    </>;
   }
   if (!book) {
     return "문제 발생 다시 시도해주세요";
